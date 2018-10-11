@@ -44,5 +44,8 @@ int main()
     printf("Duration of the training is %.f minutes",r1.duration);
 
 
+
     return 0;
+    //asdf
+
 }
