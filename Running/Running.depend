@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1539113147 source:d:\archivos de progama\codeblocks\running\main.c
+	<time.h>
+	<stdio.h>
+	<stdlib.h>
+
