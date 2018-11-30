@@ -13,7 +13,7 @@ typedef struct Run {
 
 typedef struct List{
     Run data;
-    struct list * next;
+    struct List * next;
 } List;
 
 //equals function: if two Runs have the exact same start time and length we consider it as the same Run
@@ -51,7 +51,6 @@ int time_difference(struct tm end,struct tm start){
     int minutos = end.tm_min - start.tm_min;
     minutos = minutos + horas*60;
     return minutos;
-
 }
 
 void run_into_file(int day,int month,int year,int start_hour,int start_min,int end_hour,
@@ -64,7 +63,7 @@ void run_into_file(int day,int month,int year,int start_hour,int start_min,int e
     /*saves into file with format:
        DD/MM/YYYY HH:MM-HH:MM X.X
     */
-    fprintf(fp,"%02d/%02d/%4d %02d:%02d-%02d:%02d %.1f\n",
+    fprintf(fp,"%02d/%02d/%4d %02d:%02d-%02d:%02d %lf\n",
             day,month,year,
             start_hour,start_min,end_hour,end_min,
             length);
@@ -73,11 +72,11 @@ void run_into_file(int day,int month,int year,int start_hour,int start_min,int e
     status = fclose(fp);
     if (status!=0){
      return 1;
-    } else printf("---------------------------------------\nSuccesfully saved run into Running.txt\n---------------------------------------");
+    } else printf("---------------------------------------\nSuccesfully saved run into Running.txt\n---------------------------------------\n");
 
 }
 
-
+/*
 Run string_to_run(char * str){//returns the string data as a Run object
     Run r;
     sscanf(str,"%d/%d/%d %d:%d-%d:%d %f\n",
@@ -85,6 +84,16 @@ Run string_to_run(char * str){//returns the string data as a Run object
            &r.start_time.tm_hour,&r.start_time.tm_min,&r.end_time.tm_hour,&r.end_time.tm_min,
            &r.length);
     return r;
+}*/
+double extract_decimals(double num){
+
+    int intpart = (int)num;
+    double decpart = num - intpart;
+    return decpart;
+
+}
+double pace_calculator(int duration,double length){
+    return duration/length;
 }
 
 List* read_file(List *head){
@@ -97,29 +106,24 @@ List* read_file(List *head){
       perror("Error opening file 'Running.txt'");
       return;
     }
-    while (fscanf(fp,"%d/%d/%d %d:%d-%d:%d %f\n",
+    while (fscanf(fp,"%d/%d/%d %d:%d-%d:%d %lf\n",
            &r.start_time.tm_mday,&r.start_time.tm_mon,&r.start_time.tm_year,
            &r.start_time.tm_hour,&r.start_time.tm_min,&r.end_time.tm_hour,&r.end_time.tm_min,
            &r.length)==8) {
+        r.duration = time_difference(r.end_time,r.start_time);
+        double pace = pace_calculator(r.duration,r.length);
+        r.pace.tm_min = pace;
+        r.pace.tm_sec = extract_decimals(pace) * 60;
+
         head = insert_run(head,r);
     }
     fclose(fp);
     return head;
 }
 
-double extract_decimals(double num){
-
-    int intpart = (int)num;
-    double decpart = num - intpart;
-    return decpart;
-
-}
-double pace_calculator(int duration,double length){
-    return duration/length;
-}
 //Run structure to string
 void run_print(Run r){
-    printf("Started on the %02d/%02d/%4d from %02d:%02d to %02d:%02d\n%.1f km in %d minutes\nPace of %02d:%02d/km\n\n",
+    printf("Started on the %02d/%02d/%4d from %02d:%02d to %02d:%02d\n%.1f km in %.f minutes\nPace of %02d:%02d/km\n\n",
            r.start_time.tm_mday,r.start_time.tm_mon,r.start_time.tm_year,r.start_time.tm_hour,r.start_time.tm_min,r.end_time.tm_hour,r.end_time.tm_min,
            r.length,r.duration,r.pace.tm_min,r.pace.tm_sec);
 }
@@ -147,7 +151,8 @@ int main()
 {
     //DO YOU WISH TO ADD A FILE OR TO CREATE A NEW ONE?YES->LOADS THE DATA FROM A TEXT FILE;NO->CREATES A NEW TEXT FILE;
     //case 1 add a run
-/*    Run r1;
+/*
+    Run r1;
     printf("Enter date of the training (DD/MM/YYYY)\n");
     scanf("%d/%d/%d",&r1.start_time.tm_mday
                     ,&r1.start_time.tm_mon
@@ -167,17 +172,22 @@ int main()
     scanf("%lf",&r1.length);
 
     r1.duration = time_difference(r1.end_time,r1.start_time);
-    printf("Duration of the training is %.f minutes\n",r1.duration);
+    printf("Duration of the training was %.f minutes\n",r1.duration);
+
+   // printf("Length of training is %.1f",r1.length);
 
     double pace = pace_calculator(r1.duration,r1.length);
     r1.pace.tm_min = pace;
     r1.pace.tm_sec = extract_decimals(pace) * 60; //converts decimal time into MM:SS format
     printf("Pace per kilometer is %02d:%02d\n",r1.pace.tm_min,r1.pace.tm_sec);
 
+    //run_print(r1);
+
     run_into_file(r1.start_time.tm_mday,r1.start_time.tm_mon,r1.start_time.tm_year,
                   r1.start_time.tm_hour,r1.start_time.tm_min,r1.end_time.tm_hour,r1.end_time.tm_min,
                   r1.length);
 */
+
     //reading the file and saving it into a list
     List *head = NULL;
     head = read_file(head);
