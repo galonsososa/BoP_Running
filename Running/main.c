@@ -30,10 +30,10 @@ bool equals(Run r1,Run r2){
 }
 
 List *insert_run(List *head, Run run) {
-    List *newel = (List *) malloc(sizeof(List)); /* New element */
-    newel->data = run; /* Copy data to store to the list element */
-    newel->next  = head; /* After the new element goes the rest of the list (even if it is empty) */
-    return newel; /* The new element will be the new head of the list */
+    List *newel = (List *) malloc(sizeof(List));
+    newel->data = run;
+    newel->next  = head;
+    return newel;
 }
 
 List *search_run(List *head, Run run) {
@@ -77,24 +77,8 @@ void run_into_file(int day,int month,int year,int start_hour,int start_min,int e
 
 }
 
-/*antiguo
-void file_to_run(){
-    FILE *fp = fopen("Running.txt","r");
-    if (fp==NULL) return -1;
 
-    //puts into the set a run
-    Run r;
-    fscanf(fp,"%d/%d/%d\n%d:%d-%d:%d\n%f\n--\n",
-           &r.start_time.tm_mday,&r.start_time.tm_mon,&r.start_time.tm_year,
-           &r.start_time.tm_hour,&r.start_time.tm_min,&r.end_time.tm_hour,&r.end_time.tm_min,
-           &r.length);
-
-    //puts into the set a run
-   // printf("%d/%d/%d",day,month,year);//en vez de imprimir crear un array en memoria y meter los datos de una carrera
-    fclose(fp);
-}*/
-
-Run string_to_run(char * str){
+Run string_to_run(char * str){//returns the string data as a Run object
     Run r;
     sscanf(str,"%d/%d/%d %d:%d-%d:%d %f\n",
            &r.start_time.tm_mday,&r.start_time.tm_mon,&r.start_time.tm_year,
@@ -103,21 +87,24 @@ Run string_to_run(char * str){
     return r;
 }
 
-void read_file(List *head){
+List* read_file(List *head){
 
+    Run r;
     FILE *fp = fopen("Running.txt","r");
     char *str;
 
-    if(fp == NULL) {
+    if(fp == NULL) {//this works
       perror("Error opening file 'Running.txt'");
-      return(-1);
+      return;
     }
-    while (fgets(str,50,fp)!=NULL){
-        fgets(str,50,fp);
-        head = insert_run(head,string_to_run(str));
+    while (fscanf(fp,"%d/%d/%d %d:%d-%d:%d %f\n",
+           &r.start_time.tm_mday,&r.start_time.tm_mon,&r.start_time.tm_year,
+           &r.start_time.tm_hour,&r.start_time.tm_min,&r.end_time.tm_hour,&r.end_time.tm_min,
+           &r.length)==8) {
+        head = insert_run(head,r);
     }
-
     fclose(fp);
+    return head;
 }
 
 double extract_decimals(double num){
@@ -130,23 +117,27 @@ double extract_decimals(double num){
 double pace_calculator(int duration,double length){
     return duration/length;
 }
+//Run structure to string
+void run_print(Run r){
+    printf("Started on the %02d/%02d/%4d from %02d:%02d to %02d:%02d\n%.1f km in %d minutes\nPace of %02d:%02d/km\n\n",
+           r.start_time.tm_mday,r.start_time.tm_mon,r.start_time.tm_year,r.start_time.tm_hour,r.start_time.tm_min,r.end_time.tm_hour,r.end_time.tm_min,
+           r.length,r.duration,r.pace.tm_min,r.pace.tm_sec);
+}
 
 void list_print(List *head) {
     List *p;
     for (p = head; p != NULL; p = p->next)
-        printf("%d ", p->data);
+        //printf("%d ", p->data);
+        run_print(p->data);
     printf("\n");
 }
 
 void list_free(List *head) {
     List *p = head;
-    /* Traversing the list */
     while (p != NULL) {
-        /* Just writing free(p); is wrong, the rest of the list would be lost */
-        /* hence p=p->nxt; would be invalid */
-        List *tmp = p->next; /* Store the pointer to the rest of the list */
-        free(p); /* Now we can delete the current element */
-        p = tmp; /* Keep releasing the list from the next element on */
+        List *tmp = p->next;
+        free(p);
+        p = tmp;
     }
 }
 
@@ -156,7 +147,7 @@ int main()
 {
     //DO YOU WISH TO ADD A FILE OR TO CREATE A NEW ONE?YES->LOADS THE DATA FROM A TEXT FILE;NO->CREATES A NEW TEXT FILE;
     //case 1 add a run
-    Run r1;
+/*    Run r1;
     printf("Enter date of the training (DD/MM/YYYY)\n");
     scanf("%d/%d/%d",&r1.start_time.tm_mday
                     ,&r1.start_time.tm_mon
@@ -174,7 +165,6 @@ int main()
 
     printf("How many kilometres did you run?\n");
     scanf("%lf",&r1.length);
-    printf("Run distance %f",r1.length);
 
     r1.duration = time_difference(r1.end_time,r1.start_time);
     printf("Duration of the training is %.f minutes\n",r1.duration);
@@ -187,10 +177,10 @@ int main()
     run_into_file(r1.start_time.tm_mday,r1.start_time.tm_mon,r1.start_time.tm_year,
                   r1.start_time.tm_hour,r1.start_time.tm_min,r1.end_time.tm_hour,r1.end_time.tm_min,
                   r1.length);
-
+*/
     //reading the file and saving it into a list
     List *head = NULL;
-    read_file(head);
+    head = read_file(head);
     list_print(head);
     list_free(head);
 
