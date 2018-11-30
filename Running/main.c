@@ -16,8 +16,17 @@ typedef struct List{
     struct List * next;
 } List;
 
+bool equals_dates(struct tm date1,struct tm date2){
+    if ((date1.tm_mday == date2.tm_mday) &&
+        (date1.tm_mon == date2.tm_mon) &&
+        (date1.tm_year == date2.tm_year)){
+            return true;
+        }
+    return false;
+}
+
 //equals function: if two Runs have the exact same start time and length we consider it as the same Run
-bool equals(Run r1,Run r2){
+bool equals_run(Run r1,Run r2){
     if ((r1.start_time.tm_mday == r2.start_time.tm_mday)&&
         r1.start_time.tm_mon == r2.start_time.tm_mon &&
         r1.start_time.tm_year == r2.start_time.tm_year &&
@@ -28,7 +37,7 @@ bool equals(Run r1,Run r2){
         }
     return false;
 }
-
+//inserting in the list
 List *insert_run(List *head, Run run) {
     List *newel = (List *) malloc(sizeof(List));
     newel->data = run;
@@ -36,15 +45,26 @@ List *insert_run(List *head, Run run) {
     return newel;
 }
 
+//looks for a run with the given date in the list
+Run filter_by_date(List * head,struct tm date){
+    List *p;
+    for (p=head;p!=NULL;p=p->next){
+        if(equals_dates(date,p->data.start_time)){
+            return p->data;
+        }
+    }
+    return;
+}
+
 List *search_run(List *head, Run run) {
     List *p;
     for (p = head; p != NULL; p = p->next)
-        if (equals(p->data,run))
+        if (equals_run(p->data,run))
             return p;
     return NULL;
 }
 
-
+//end_time - start_time;output in minutes format
 int time_difference(struct tm end,struct tm start){
 
     int horas = end.tm_hour - start.tm_hour;
@@ -72,8 +92,11 @@ void run_into_file(int day,int month,int year,int start_hour,int start_min,int e
     status = fclose(fp);
     if (status!=0){
      return 1;
-    } else printf("---------------------------------------\nSuccesfully saved run into Running.txt\n---------------------------------------\n");
-
+    } else{
+        printf("--------------------------------------\n");
+        printf("Succesfully saved run into Running.txt\n");
+        printf("--------------------------------------\n");
+    }
 }
 
 /*
@@ -149,51 +172,83 @@ void list_free(List *head) {
 
 int main()
 {
-    //DO YOU WISH TO ADD A FILE OR TO CREATE A NEW ONE?YES->LOADS THE DATA FROM A TEXT FILE;NO->CREATES A NEW TEXT FILE;
-    //case 1 add a run
+    while(1){
+
+
+    int input;
+    printf("1 - Add new run data\n");
+    printf("2 - Obtain information about a date's run\n");
+    printf("3 - Obtain information about a period of time\n");
+    printf("4 - Objective pace\n");
+    printf("5 - Exit\n");
+    scanf("%d",&input);
+    switch(input){
+        case 1:{
+            Run r1;
+            printf("Enter date of the training (DD/MM/YYYY)\n");
+            scanf("%d/%d/%d",&r1.start_time.tm_mday
+                            ,&r1.start_time.tm_mon
+                            ,&r1.start_time.tm_year);
+            r1.end_time.tm_mday = r1.start_time.tm_mday;
+            r1.end_time.tm_mon = r1.start_time.tm_mon;
+            r1.end_time.tm_year = r1.start_time.tm_year;
+
+            //cubrir errores de dias meses erroneos etc
+            printf("What time did you start? (HH.MM)\n");
+            scanf("%2d.%2d",&r1.start_time.tm_hour,&r1.start_time.tm_min);
+
+            printf("What time did you finish? (HH.MM)\n");
+            scanf("%2d.%2d",&r1.end_time.tm_hour,&r1.end_time.tm_min);
+
+            printf("How many kilometres did you run?\n");
+            scanf("%lf",&r1.length);
+
+            r1.duration = time_difference(r1.end_time,r1.start_time);
+            printf("Duration of the training was %.f minutes\n",r1.duration);
+
+
+            double pace = pace_calculator(r1.duration,r1.length);
+            r1.pace.tm_min = pace;
+            r1.pace.tm_sec = extract_decimals(pace) * 60; //converts decimal time into MM:SS format
+            printf("Pace per kilometer is %02d:%02d\n",r1.pace.tm_min,r1.pace.tm_sec);
+
+            //run_print(r1);
+
+            run_into_file(r1.start_time.tm_mday,r1.start_time.tm_mon,r1.start_time.tm_year,
+                        r1.start_time.tm_hour,r1.start_time.tm_min,r1.end_time.tm_hour,r1.end_time.tm_min,
+                        r1.length);
+            break;
+        }
+        case 2:{
+            List *head = NULL;
+            head = read_file(head);
+            struct tm date;
+            printf("Enter a date(DD/MM/YYYY)\n");
+            scanf("%02d/%02d/%04d",&date.tm_mday,&date.tm_mon,&date.tm_year);
+            run_print(filter_by_date(head,date));
+
+            break;
+        }
+        case 5: {
+            exit(0);
+            break;
+        }
+        default:
+            printf("----------------------------------\n");
+            printf("You have entered an invalid option\n");
+            printf("----------------------------------\n");
+            printf("Please enter one of these options:\n\n");
+    }
+
+
 /*
-    Run r1;
-    printf("Enter date of the training (DD/MM/YYYY)\n");
-    scanf("%d/%d/%d",&r1.start_time.tm_mday
-                    ,&r1.start_time.tm_mon
-                    ,&r1.start_time.tm_year);
-    r1.end_time.tm_mday = r1.start_time.tm_mday;
-    r1.end_time.tm_mon = r1.start_time.tm_mon;
-    r1.end_time.tm_year = r1.start_time.tm_year;
-
-    //cubrir errores de dias meses erroneos etc
-    printf("What time did you start? (HH.MM)\n");
-    scanf("%2d.%2d",&r1.start_time.tm_hour,&r1.start_time.tm_min);
-
-    printf("What time did you finish? (HH.MM)\n");
-    scanf("%2d.%2d",&r1.end_time.tm_hour,&r1.end_time.tm_min);
-
-    printf("How many kilometres did you run?\n");
-    scanf("%lf",&r1.length);
-
-    r1.duration = time_difference(r1.end_time,r1.start_time);
-    printf("Duration of the training was %.f minutes\n",r1.duration);
-
-   // printf("Length of training is %.1f",r1.length);
-
-    double pace = pace_calculator(r1.duration,r1.length);
-    r1.pace.tm_min = pace;
-    r1.pace.tm_sec = extract_decimals(pace) * 60; //converts decimal time into MM:SS format
-    printf("Pace per kilometer is %02d:%02d\n",r1.pace.tm_min,r1.pace.tm_sec);
-
-    //run_print(r1);
-
-    run_into_file(r1.start_time.tm_mday,r1.start_time.tm_mon,r1.start_time.tm_year,
-                  r1.start_time.tm_hour,r1.start_time.tm_min,r1.end_time.tm_hour,r1.end_time.tm_min,
-                  r1.length);
-*/
 
     //reading the file and saving it into a list
     List *head = NULL;
     head = read_file(head);
     list_print(head);
-    list_free(head);
-
+    list_free(head);*/
+    }
 
     return 0;
 
