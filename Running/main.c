@@ -25,6 +25,15 @@ bool equals_dates(struct tm date1,struct tm date2){
     return false;
 }
 
+bool run_betwenn_dates(Run r,struct tm date1,struct tm date2){
+    if ((date1.tm_mday <= r.start_time.tm_mday && r.start_time.tm_mday <= date2.tm_mday) &&
+        (date1.tm_mon <= r.start_time.tm_mon && r.start_time.tm_mon <= date2.tm_mon) &&
+        (date1.tm_year <= r.start_time.tm_year && r.start_time.tm_year <= date2.tm_year)){
+            return true;
+        }
+    return false;
+}
+
 //equals function: if two Runs have the exact same start time and length we consider it as the same Run
 bool equals_run(Run r1,Run r2){
     if ((r1.start_time.tm_mday == r2.start_time.tm_mday)&&
@@ -54,6 +63,18 @@ Run filter_by_date(List * head,struct tm date){
         }
     }
     return;
+}
+
+List *filter_by_period(List* head,struct tm date1,struct tm date2){
+    List *res;
+    List *p;
+    for (p=head;p!=NULL;p=p->next){
+        if (run_betwenn_dates(p->data,date1,date2)){
+                printf("*****esto funciona****");
+            //insert_run(res,p->data);
+        }
+    }
+    return res;
 }
 
 List *search_run(List *head, Run run) {
@@ -226,6 +247,18 @@ int main()
             printf("Enter a date(DD/MM/YYYY)\n");
             scanf("%02d/%02d/%04d",&date.tm_mday,&date.tm_mon,&date.tm_year);
             run_print(filter_by_date(head,date));
+
+            break;
+        }
+        case 3:{
+            List*head = NULL;
+            head = read_file(head);
+            struct tm date1;
+            struct tm date2;
+            printf("Enter two dates forming a period(DD/MM/YYYY)\n");
+            scanf("%02d/%02d/%04d",&date1.tm_mday,&date1.tm_mon,&date1.tm_year);
+            scanf("%02d/%02d/%04d",&date2.tm_mday,&date2.tm_mon,&date2.tm_year);
+            list_print(filter_by_period(head,date1,date2));
 
             break;
         }
