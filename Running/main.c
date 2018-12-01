@@ -65,6 +65,18 @@ bool equals_run(Run r1,Run r2){
         }
     return false;
 }
+
+int list_length(List *head) {
+
+    int len = 0;
+    List *p = head;
+    while (p != NULL) {
+        len++;
+        p = p->next;
+    }
+    return len;
+}
+
 //inserting in the list
 List *insert_run(List *head, Run run) {
     List *newel = (List *) malloc(sizeof(List));
@@ -81,6 +93,8 @@ Run filter_by_date(List * head,struct tm date){
             return p->data;
         }
     }
+    printf("\nNo run found on that date\n");
+    exit(0);
     return;
 }
 
@@ -91,6 +105,9 @@ List *filter_by_period(List* head,struct tm date1,struct tm date2){
         if (run_between(p->data,date1,date2)){
             run_print(p->data);
         }
+    }
+    if (list_length(res)==0){
+        printf("No runs found on that period of time");
     }
     return res;
 }
@@ -174,8 +191,9 @@ List* read_file(List *head){
     return head;
 }
 
+
 //returns the latest run in time of the both given
-Run latest_run(Run r1,Run r2){
+Run date_comparator(Run r1,Run r2){
     int first = r1.start_time.tm_mday + r1.start_time.tm_mon*30 + r1.start_time.tm_year*365;
     int second = r2.start_time.tm_mday + r2.start_time.tm_mon*30 + r2.start_time.tm_year*365;
     if (first>second){
@@ -184,12 +202,13 @@ Run latest_run(Run r1,Run r2){
     return r2;
 }
 
+//returns the last run of the list(according to date)
 Run last_run(List *head){
     List*p;
     Run r;
     r.start_time.tm_mday = 1;
     for(p=head;p!=NULL;p=p->next){
-        r = latest_run(r,p->data);
+        r = date_comparator(r,p->data);
     }
     return r;
 }
@@ -200,8 +219,10 @@ void last_run_pace(Run r){
     r.pace.tm_min = pace;
     r.pace.tm_sec = extract_decimals(pace) * 60;
 
-    printf("\nLast run on %02d/%02d/%04d had a pace of %02d:%02d/km\n\n",r.start_time.tm_mday,r.start_time.tm_mon,r.start_time.tm_year,r.pace.tm_min,r.pace.tm_sec);
+    printf("\nLast run on %02d/%02d/%04d.Your next objective is to improve %02d:%02d/km\n\n",r.start_time.tm_mday,r.start_time.tm_mon,r.start_time.tm_year,r.pace.tm_min,r.pace.tm_sec);
 }
+
+
 
 //Run structure to string
 void run_print(Run r){
@@ -216,6 +237,8 @@ void list_print(List *head) {
         run_print(p->data);
     printf("\n");
 }
+
+
 
 void list_free(List *head) {
     List *p = head;
