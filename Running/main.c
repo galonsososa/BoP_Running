@@ -281,7 +281,7 @@ int main()
             printf("What time did you finish? (HH.MM)\n");
             scanf("%2d.%2d",&r1.end_time.tm_hour,&r1.end_time.tm_min);
 
-            printf("How many kilometres did you run?\n");
+            printf("How many kilometres did you run?\n\n");
             scanf("%lf",&r1.length);
 
             r1.duration = time_difference(r1.end_time,r1.start_time);
@@ -291,7 +291,7 @@ int main()
             double pace = pace_calculator(r1.duration,r1.length);
             r1.pace.tm_min = pace;
             r1.pace.tm_sec = extract_decimals(pace) * 60; //converts decimal time into MM:SS format
-            printf("Pace per kilometer is %02d:%02d\n",r1.pace.tm_min,r1.pace.tm_sec);
+            printf("Pace per kilometer is %02d:%02d\n\n",r1.pace.tm_min,r1.pace.tm_sec);
 
             //saving the obtained data into the text file
             run_into_file(r1.start_time.tm_mday,r1.start_time.tm_mon,r1.start_time.tm_year,
@@ -303,7 +303,7 @@ int main()
             List *head = NULL;
             head = read_file(head);
             struct tm date;
-            printf("Enter a date(DD/MM/YYYY)\n");
+            printf("Enter a date(DD/MM/YYYY)\n\n");
             scanf("%02d/%02d/%04d",&date.tm_mday,&date.tm_mon,&date.tm_year);
             run_print(filter_by_date(head,date));
 
