@@ -98,18 +98,18 @@ Run filter_by_date(List * head,struct tm date){
     return;
 }
 
-List *filter_by_period(List* head,struct tm date1,struct tm date2){
-    List *res = (List *) malloc(sizeof(List));
+void filter_by_period(List* head,struct tm date1,struct tm date2){
+    int i = 0;
     List *p;
     for (p=head;p!=NULL;p=p->next){
         if (run_between(p->data,date1,date2)){
             run_print(p->data);
+            i++;
         }
     }
-    if (list_length(res)==0){
-        printf("No runs found on that period of time");
+    if (i==0){
+        printf("No runs found on that period of time\n\n");
     }
-    return res;
 }
 
 List *search_run(List *head, Run run) {
