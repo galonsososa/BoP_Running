@@ -26,11 +26,22 @@ bool equals_dates(struct tm date1,struct tm date2){
 }
 
 bool run_betwenn_dates(Run r,struct tm date1,struct tm date2){
-    if ((date1.tm_mday <= r.start_time.tm_mday && r.start_time.tm_mday <= date2.tm_mday) &&
-        (date1.tm_mon <= r.start_time.tm_mon && r.start_time.tm_mon <= date2.tm_mon) &&
-        (date1.tm_year <= r.start_time.tm_year && r.start_time.tm_year <= date2.tm_year)){
+    if ((r.start_time.tm_mday>=date1.tm_mday) && (r.start_time.tm_mday <= date2.tm_mday) &&
+        (r.start_time.tm_mon>=date1.tm_mon) && (r.start_time.tm_mon <= date2.tm_mon) &&
+        (r.start_time.tm_year>=date1.tm_year) && (r.start_time.tm_year <= date2.tm_year)){
+            printf("el run betw dates sale true");
             return true;
-        }
+        }else printf("sale false");
+    return false;
+}
+
+bool run_between(Run r,struct tm date1,struct tm date2){
+    int run_date = r.start_time.tm_mday + r.start_time.tm_mon*30 + r.start_time.tm_year*365;
+    int first_date = date1.tm_mday + date1.tm_mon*30 + date1.tm_year*365;
+    int second_date = date2.tm_mday + date2.tm_mon*30 + date2.tm_year*365;
+    if ((run_date>=first_date) && (run_date<=second_date)){
+        return true;
+    }
     return false;
 }
 
@@ -66,12 +77,11 @@ Run filter_by_date(List * head,struct tm date){
 }
 
 List *filter_by_period(List* head,struct tm date1,struct tm date2){
-    List *res;
+    List *res = (List *) malloc(sizeof(List));
     List *p;
     for (p=head;p!=NULL;p=p->next){
-        if (run_betwenn_dates(p->data,date1,date2)){
-                printf("*****esto funciona****");
-            //insert_run(res,p->data);
+        if (run_between(p->data,date1,date2)){
+            run_print(p->data);
         }
     }
     return res;
@@ -95,7 +105,7 @@ int time_difference(struct tm end,struct tm start){
 }
 
 void run_into_file(int day,int month,int year,int start_hour,int start_min,int end_hour,
-                 int end_min,double length){ //saves the run properties into a file
+                   int end_min,double length){ //saves the run properties into a file
     FILE *fp;
     int status;
 
@@ -120,15 +130,6 @@ void run_into_file(int day,int month,int year,int start_hour,int start_min,int e
     }
 }
 
-/*
-Run string_to_run(char * str){//returns the string data as a Run object
-    Run r;
-    sscanf(str,"%d/%d/%d %d:%d-%d:%d %f\n",
-           &r.start_time.tm_mday,&r.start_time.tm_mon,&r.start_time.tm_year,
-           &r.start_time.tm_hour,&r.start_time.tm_min,&r.end_time.tm_hour,&r.end_time.tm_min,
-           &r.length);
-    return r;
-}*/
 double extract_decimals(double num){
 
     int intpart = (int)num;
@@ -146,7 +147,7 @@ List* read_file(List *head){
     FILE *fp = fopen("Running.txt","r");
     char *str;
 
-    if(fp == NULL) {//this works
+    if(fp == NULL) {
       perror("Error opening file 'Running.txt'");
       return;
     }
@@ -175,7 +176,6 @@ void run_print(Run r){
 void list_print(List *head) {
     List *p;
     for (p = head; p != NULL; p = p->next)
-        //printf("%d ", p->data);
         run_print(p->data);
     printf("\n");
 }
@@ -233,8 +233,7 @@ int main()
             r1.pace.tm_sec = extract_decimals(pace) * 60; //converts decimal time into MM:SS format
             printf("Pace per kilometer is %02d:%02d\n",r1.pace.tm_min,r1.pace.tm_sec);
 
-            //run_print(r1);
-
+            //saving the obtained data into the text file
             run_into_file(r1.start_time.tm_mday,r1.start_time.tm_mon,r1.start_time.tm_year,
                         r1.start_time.tm_hour,r1.start_time.tm_min,r1.end_time.tm_hour,r1.end_time.tm_min,
                         r1.length);
@@ -258,7 +257,8 @@ int main()
             printf("Enter two dates forming a period(DD/MM/YYYY)\n");
             scanf("%02d/%02d/%04d",&date1.tm_mday,&date1.tm_mon,&date1.tm_year);
             scanf("%02d/%02d/%04d",&date2.tm_mday,&date2.tm_mon,&date2.tm_year);
-            list_print(filter_by_period(head,date1,date2));
+            printf("\n");
+            filter_by_period(head,date1,date2);
 
             break;
         }
