@@ -36,12 +36,20 @@ bool run_betwenn_dates(Run r,struct tm date1,struct tm date2){
 }
 
 bool run_between(Run r,struct tm date1,struct tm date2){
-    int run_date = r.start_time.tm_mday + r.start_time.tm_mon*30 + r.start_time.tm_year*365;
+    int run_date = r.start_time.tm_mday + r.start_time.tm_mon*30 + r.start_time.tm_year*365;//convert the date into number of days in order to compare it
     int first_date = date1.tm_mday + date1.tm_mon*30 + date1.tm_year*365;
     int second_date = date2.tm_mday + date2.tm_mon*30 + date2.tm_year*365;
     if ((run_date>=first_date) && (run_date<=second_date)){
         return true;
     }
+    return false;
+}
+
+//if the first date is after the second returns true
+bool first_date_after_second(struct tm date1,struct tm date2){
+    int first_date = date1.tm_mday + date1.tm_mon*30 + date1.tm_year*365;
+    int second_date = date2.tm_mday + date2.tm_mon*30 + date2.tm_year*365;
+    if (second_date<first_date) return true;
     return false;
 }
 
@@ -166,6 +174,35 @@ List* read_file(List *head){
     return head;
 }
 
+//returns the latest run in time of the both given
+Run latest_run(Run r1,Run r2){
+    int first = r1.start_time.tm_mday + r1.start_time.tm_mon*30 + r1.start_time.tm_year*365;
+    int second = r2.start_time.tm_mday + r2.start_time.tm_mon*30 + r2.start_time.tm_year*365;
+    if (first>second){
+        return r1;
+    }
+    return r2;
+}
+
+Run last_run(List *head){
+    List*p;
+    Run r;
+    r.start_time.tm_mday = 1;
+    for(p=head;p!=NULL;p=p->next){
+        r = latest_run(r,p->data);
+    }
+    return r;
+}
+
+void last_run_pace(Run r){
+    r.duration = time_difference(r.end_time,r.start_time);
+    double pace = pace_calculator(r.duration,r.length);
+    r.pace.tm_min = pace;
+    r.pace.tm_sec = extract_decimals(pace) * 60;
+
+    printf("\nLast run on %02d/%02d/%04d had a pace of %02d:%02d/km\n\n",r.start_time.tm_mday,r.start_time.tm_mon,r.start_time.tm_year,r.pace.tm_min,r.pace.tm_sec);
+}
+
 //Run structure to string
 void run_print(Run r){
     printf("Started on the %02d/%02d/%4d from %02d:%02d to %02d:%02d\n%.1f km in %.f minutes\nPace of %02d:%02d/km\n\n",
@@ -258,7 +295,21 @@ int main()
             scanf("%02d/%02d/%04d",&date1.tm_mday,&date1.tm_mon,&date1.tm_year);
             scanf("%02d/%02d/%04d",&date2.tm_mday,&date2.tm_mon,&date2.tm_year);
             printf("\n");
+            if(first_date_after_second(date1,date2)) {
+                printf("------------------------------------------------------------\n");
+                printf("First date has to be before the second date.Please try again\n");
+                printf("------------------------------------------------------------\n\n");
+                break;
+            }
             filter_by_period(head,date1,date2);
+
+            break;
+        }
+        case 4:{
+            //your best pace is xx
+            List *head = NULL;
+            head = read_file(head);
+            last_run_pace(last_run(head));
 
             break;
         }
