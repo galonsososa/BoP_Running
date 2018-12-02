@@ -66,16 +66,7 @@ bool equals_run(Run r1,Run r2){
     return false;
 }
 
-int list_length(List *head) {
 
-    int len = 0;
-    List *p = head;
-    while (p != NULL) {
-        len++;
-        p = p->next;
-    }
-    return len;
-}
 
 //inserting in the list
 List *insert_run(List *head, Run run) {
@@ -253,7 +244,7 @@ void list_free(List *head) {
 
 int main()
 {
-    while(1){
+  while(1){
 
 
     int input;
@@ -261,7 +252,8 @@ int main()
     printf("2 - Obtain information about a date's run\n");
     printf("3 - Obtain information about a period of time\n");
     printf("4 - Objective pace\n");
-    printf("5 - Exit\n");
+    printf("5 - Developer's info\n");
+    printf("6 - Exit\n");
     scanf("%d",&input);
     switch(input){
         case 1:{
@@ -329,14 +321,21 @@ int main()
             break;
         }
         case 4:{
-            //your best pace is xx
+
             List *head = NULL;
             head = read_file(head);
             last_run_pace(last_run(head));
 
             break;
         }
-        case 5: {
+        case 5:{
+            printf(" -------------------------------------------\n");
+            printf(" C program developed by Gonzalo Alonso Sosa\n");
+            printf(" December 2018 - BME - Basics of Progamming I\n");
+            printf(" -------------------------------------------\n\n");
+            break;
+        }
+        case 6: {
             exit(0);
             break;
         }
@@ -346,16 +345,7 @@ int main()
             printf("----------------------------------\n");
             printf("Please enter one of these options:\n\n");
     }
-
-
-/*
-
-    //reading the file and saving it into a list
-    List *head = NULL;
-    head = read_file(head);
-    list_print(head);
-    list_free(head);*/
-    }
+  }
 
     return 0;
 
