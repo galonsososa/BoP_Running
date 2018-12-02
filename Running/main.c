@@ -25,16 +25,6 @@ bool equals_dates(struct tm date1,struct tm date2){
     return false;
 }
 
-bool run_betwenn_dates(Run r,struct tm date1,struct tm date2){
-    if ((r.start_time.tm_mday>=date1.tm_mday) && (r.start_time.tm_mday <= date2.tm_mday) &&
-        (r.start_time.tm_mon>=date1.tm_mon) && (r.start_time.tm_mon <= date2.tm_mon) &&
-        (r.start_time.tm_year>=date1.tm_year) && (r.start_time.tm_year <= date2.tm_year)){
-            printf("el run betw dates sale true");
-            return true;
-        }else printf("sale false");
-    return false;
-}
-
 bool run_between(Run r,struct tm date1,struct tm date2){
     int run_date = r.start_time.tm_mday + r.start_time.tm_mon*30 + r.start_time.tm_year*365;//convert the date into number of days in order to compare it
     int first_date = date1.tm_mday + date1.tm_mon*30 + date1.tm_year*365;
